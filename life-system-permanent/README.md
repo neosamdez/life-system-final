@@ -2,13 +2,21 @@
 
 Uma aplicação web completa para gamificação pessoal com sistema de quests, atributos RPG e gestão financeira integrada.
 
-## 🏗️ Arquitetura
+## � Funcionalidades Principais
+
+- **Gamificação Pessoal**: Transforme tarefas em quests e ganhe XP.
+- **Sistema de Level Up**: Suba de nível ao completar tarefas (Easy=10xp, Medium=30xp, Hard=50xp).
+- **Atributos RPG**: Melhore Força, Inteligência, Carisma, etc.
+- **Gestão Financeira**: Controle receitas e despesas com categorias personalizadas.
+- **Dashboard Interativo**: Visualize seu progresso e status atual.
+
+## �🏗️ Arquitetura
 
 ```
 life-system-permanent/
-├── backend/                 # FastAPI + SQLAlchemy
+├── backend/                 # FastAPI + SQLAlchemy (Async)
 │   └── app/
-│       ├── api/            # Endpoints
+│       ├── api/            # Endpoints (Auth, Quests, Players)
 │       ├── models/         # SQLAlchemy models
 │       ├── schemas/        # Pydantic schemas
 │       ├── services/       # Lógica de negócio
@@ -18,7 +26,7 @@ life-system-permanent/
 │       ├── pages/
 │       ├── components/
 │       ├── hooks/
-│       ├── services/
+│       ├── services/       # Integração API (Axios)
 │       └── types/
 ├── requirements.txt        # Dependências Python
 ├── Procfile               # Deploy no Render
@@ -29,20 +37,29 @@ life-system-permanent/
 
 ### Backend (Python)
 
-1. **Instale as dependências**:
+1. **Instale as dependências** (Recomendado usar `venv`):
 ```bash
-pip install -r requirements.txt
+python3 -m venv venv
+source venv/bin/activate
+pip install -r backend/requirements.txt
 ```
 
 2. **Configure o banco de dados**:
-```bash
-# Crie um arquivo .env com:
+Crie um arquivo `.env` na raiz com sua string de conexão:
+```env
 DATABASE_URL=postgresql+asyncpg://user:password@host:port/database
-SECRET_KEY=seu-secret-key
+SECRET_KEY=sua-chave-secreta-aqui
 ```
 
-3. **Inicie o servidor**:
+3. **Inicialize o Banco de Dados**:
 ```bash
+source venv/bin/activate
+python backend/init_db.py
+```
+
+4. **Inicie o servidor**:
+```bash
+source venv/bin/activate
 uvicorn backend.app.main:app --reload
 ```
 
@@ -57,9 +74,9 @@ npm install
 ```
 
 2. **Configure a URL da API**:
-```bash
-# Crie um arquivo .env.local com:
-VITE_API_URL=http://localhost:8000/api/v1
+Crie um arquivo `.env.local` em `client/`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 3. **Inicie o servidor**:
@@ -72,15 +89,23 @@ O frontend estará disponível em `http://localhost:3000`
 ## 📚 Endpoints da API
 
 ### Autenticação
-- `POST /api/v1/auth/register` - Registrar novo usuário
-- `POST /api/v1/auth/login` - Fazer login
-- `GET /api/v1/auth/me` - Obter dados do usuário atual
+- `POST /auth/register` - Registrar novo usuário
+- `POST /auth/login` - Fazer login
+- `GET /auth/me` - Obter dados do usuário atual
+
+### Quests
+- `GET /quests` - Listar quests
+- `POST /quests` - Criar nova quest
+- `PATCH /quests/{id}/complete` - Completar quest (Ganha XP e verifica Level Up)
+
+### Player
+- `GET /player/stats` - Ver estatísticas e nível
 
 ## 🗄️ Banco de Dados
 
 ### Tabelas
 - **users** - Usuários do sistema
-- **player_stats** - Estatísticas de gamificação
+- **player_stats** - Estatísticas de gamificação (XP, Nível, Atributos)
 - **quests** - Missões do jogador
 - **transactions** - Transações financeiras
 
@@ -109,38 +134,22 @@ O sistema usa JWT (JSON Web Tokens) para autenticação.
 1. Faça push do código para GitHub
 2. Importe o projeto no [Vercel](https://vercel.com)
 3. Configure as variáveis de ambiente:
-   - `VITE_API_URL` - URL da API no Render
+   - `NEXT_PUBLIC_API_URL` - URL da API no Render
 4. Deploy automático
 
-## 🛠️ Desenvolvimento
-
-### Adicionar novo endpoint
-
-1. Crie um novo arquivo em `backend/app/api/endpoints/`
-2. Defina os schemas em `backend/app/schemas/`
-3. Implemente a lógica em `backend/app/services/`
-4. Registre o router em `backend/app/main.py`
-
-### Adicionar novo modelo
-
-1. Defina o modelo em `backend/app/models/models.py`
-2. Crie os schemas correspondentes
-3. Execute `alembic upgrade head` para migrar o banco
-
-## 📝 Tecnologias
+##  Tecnologias
 
 ### Backend
-- **FastAPI** - Framework web
-- **SQLAlchemy 2.0** - ORM
-- **PostgreSQL** - Banco de dados
-- **Pydantic** - Validação de dados
-- **PyJWT** - Autenticação
+- **FastAPI** - Framework web moderno e rápido
+- **SQLAlchemy 2.0 (Async)** - ORM para banco de dados
+- **PostgreSQL** - Banco de dados relacional
+- **Pydantic** - Validação de dados robusta
 
 ### Frontend
-- **Next.js** - Framework React
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Estilização
-- **Axios** - Cliente HTTP
+- **Next.js** - Framework React para produção
+- **TypeScript** - Segurança de tipos
+- **Tailwind CSS** - Estilização utilitária
+- **Axios** - Cliente HTTP otimizado
 
 ## 📄 Licença
 
@@ -148,8 +157,4 @@ MIT
 
 ## 👨‍💻 Autor
 
-Desenvolvido com ❤️
-
----
-
-**Documentação completa**: Veja `ARCHITECTURE_GUIDE.md` para detalhes sobre a arquitetura.
+Desenvolvido com ❤️ para o projeto Life System.
