@@ -1,4 +1,13 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean } from "drizzle-orm/mysql-core";
+import {
+  int,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  varchar,
+  decimal,
+  boolean,
+} from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -32,31 +41,31 @@ export const playerStats = mysqlTable("playerStats", {
   userId: int("userId").notNull().unique(),
   level: int("level").default(1).notNull(),
   totalXp: int("totalXp").default(0).notNull(),
-  
+
   // Atributos individuais com XP próprio
   strengthXp: int("strengthXp").default(0).notNull(),
   strengthLevel: int("strengthLevel").default(1).notNull(),
-  
+
   intelligenceXp: int("intelligenceXp").default(0).notNull(),
   intelligenceLevel: int("intelligenceLevel").default(1).notNull(),
-  
+
   charismaXp: int("charismaXp").default(0).notNull(),
   charismaLevel: int("charismaLevel").default(1).notNull(),
-  
+
   vitalityXp: int("vitalityXp").default(0).notNull(),
   vitalityLevel: int("vitalityLevel").default(1).notNull(),
-  
+
   wisdomXp: int("wisdomXp").default(0).notNull(),
   wisdomLevel: int("wisdomLevel").default(1).notNull(),
-  
+
   agilityXp: int("agilityXp").default(0).notNull(),
   agilityLevel: int("agilityLevel").default(1).notNull(),
-  
+
   // Streaks e atividade
   questsCompleted: int("questsCompleted").default(0).notNull(),
   streakDays: int("streakDays").default(0).notNull(),
   lastActivity: timestamp("lastActivity").defaultNow().notNull(),
-  
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -70,10 +79,24 @@ export const quests = mysqlTable("quests", {
   userId: int("userId").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-  difficulty: mysqlEnum("difficulty", ["easy", "medium", "hard", "epic"]).notNull(),
-  attribute: mysqlEnum("attribute", ["strength", "intelligence", "charisma", "vitality", "wisdom", "agility"]).notNull(),
+  difficulty: mysqlEnum("difficulty", [
+    "easy",
+    "medium",
+    "hard",
+    "epic",
+  ]).notNull(),
+  attribute: mysqlEnum("attribute", [
+    "strength",
+    "intelligence",
+    "charisma",
+    "vitality",
+    "wisdom",
+    "agility",
+  ]).notNull(),
   xpReward: int("xpReward").notNull(),
-  status: mysqlEnum("status", ["active", "completed", "failed", "cancelled"]).default("active").notNull(),
+  status: mysqlEnum("status", ["active", "completed", "failed", "cancelled"])
+    .default("active")
+    .notNull(),
   dueDate: timestamp("dueDate"),
   completedAt: timestamp("completedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

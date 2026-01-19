@@ -38,6 +38,7 @@ life-system-permanent/
 ### Backend (Python)
 
 1. **Instale as dependências** (Recomendado usar `venv`):
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
@@ -45,19 +46,22 @@ pip install -r backend/requirements.txt
 ```
 
 2. **Configure o banco de dados**:
-Crie um arquivo `.env` na raiz com sua string de conexão:
+   Crie um arquivo `.env` na raiz com sua string de conexão:
+
 ```env
 DATABASE_URL=postgresql+asyncpg://user:password@host:port/database
 SECRET_KEY=sua-chave-secreta-aqui
 ```
 
 3. **Inicialize o Banco de Dados**:
+
 ```bash
 source venv/bin/activate
 python backend/init_db.py
 ```
 
 4. **Inicie o servidor**:
+
 ```bash
 source venv/bin/activate
 uvicorn backend.app.main:app --reload
@@ -68,18 +72,21 @@ A API estará disponível em `http://localhost:8000`
 ### Frontend (Next.js)
 
 1. **Instale as dependências**:
+
 ```bash
 cd client
 npm install
 ```
 
 2. **Configure a URL da API**:
-Crie um arquivo `.env.local` em `client/`:
+   Crie um arquivo `.env.local` em `client/`:
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 3. **Inicie o servidor**:
+
 ```bash
 npm run dev
 ```
@@ -89,21 +96,25 @@ O frontend estará disponível em `http://localhost:3000`
 ## 📚 Endpoints da API
 
 ### Autenticação
+
 - `POST /auth/register` - Registrar novo usuário
 - `POST /auth/login` - Fazer login
 - `GET /auth/me` - Obter dados do usuário atual
 
 ### Quests
+
 - `GET /quests` - Listar quests
 - `POST /quests` - Criar nova quest
 - `PATCH /quests/{id}/complete` - Completar quest (Ganha XP e verifica Level Up)
 
 ### Player
+
 - `GET /player/stats` - Ver estatísticas e nível
 
 ## 🗄️ Banco de Dados
 
 ### Tabelas
+
 - **users** - Usuários do sistema
 - **player_stats** - Estatísticas de gamificação (XP, Nível, Atributos)
 - **quests** - Missões do jogador
@@ -137,15 +148,17 @@ O sistema usa JWT (JSON Web Tokens) para autenticação.
    - `NEXT_PUBLIC_API_URL` - URL da API no Render
 4. Deploy automático
 
-##  Tecnologias
+## Tecnologias
 
 ### Backend
+
 - **FastAPI** - Framework web moderno e rápido
 - **SQLAlchemy 2.0 (Async)** - ORM para banco de dados
 - **PostgreSQL** - Banco de dados relacional
 - **Pydantic** - Validação de dados robusta
 
 ### Frontend
+
 - **Next.js** - Framework React para produção
 - **TypeScript** - Segurança de tipos
 - **Tailwind CSS** - Estilização utilitária
