@@ -1,9 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
 
-// Definição da URL base (Vite Standard)
+// 1. Definição da URL (Segura: Tenta a variável, se falhar usa o link direto)
 const API_URL = import.meta.env.VITE_API_URL || "https://life-system-backend.onrender.com";
 
-// Configuração da instância Axios
+console.log('🔗 API conectada em:', API_URL);
+
 const api: AxiosInstance = axios.create({
     baseURL: API_URL,
     headers: {
@@ -25,7 +26,6 @@ api.interceptors.request.use(
     }
 );
 
-// Tipos básicos de resposta
 interface ApiResponse<T = any> {
     success: boolean;
     data?: T;
@@ -33,14 +33,16 @@ interface ApiResponse<T = any> {
     [key: string]: any;
 }
 
-// Serviços de Autenticação
+// 👇 AQUI ESTAVA O ERRO: Adicionei '/api/v1' em todas as rotas para bater com o Backend
+
 export const authService = {
     login: async (credentials: any): Promise<any> => {
-        const response = await api.post('/auth/login', credentials);
+        // Antes: /auth/login -> Agora: /api/v1/auth/login
+        const response = await api.post('/api/v1/auth/login', credentials);
         return response.data;
     },
     register: async (userData: any): Promise<any> => {
-        const response = await api.post('/auth/register', userData);
+        const response = await api.post('/api/v1/auth/register', userData);
         return response.data;
     },
     logout: () => {
@@ -49,30 +51,28 @@ export const authService = {
     },
 };
 
-// Serviços de Quests
 export const questService = {
     list: async (): Promise<any[]> => {
-        const response = await api.get('/quests');
+        const response = await api.get('/api/v1/quests');
         return response.data;
     },
     complete: async (questId: number): Promise<any> => {
-        const response = await api.patch(`/quests/${questId}/complete`);
+        const response = await api.patch(`/api/v1/quests/${questId}/complete`);
         return response.data;
     },
     create: async (questData: any): Promise<any> => {
-        const response = await api.post('/quests', questData);
+        const response = await api.post('/api/v1/quests', questData);
         return response.data;
     },
 };
 
-// Serviços do Jogador
 export const playerService = {
     getStats: async (): Promise<any> => {
-        const response = await api.get('/player/stats');
+        const response = await api.get('/api/v1/player/stats');
         return response.data;
     },
     updateStats: async (stats: any): Promise<any> => {
-        const response = await api.patch('/player/stats', stats);
+        const response = await api.patch('/api/v1/player/stats', stats);
         return response.data;
     },
 };
