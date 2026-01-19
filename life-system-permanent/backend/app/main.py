@@ -2,12 +2,12 @@
 Main Application - FastAPI App Setup
 """
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 from backend.app.core import init_db, close_db
-from backend.app.api import auth_router
+from backend.app.api import auth_router, quests_router
 
 # Cria aplicação FastAPI
 app = FastAPI(
@@ -49,7 +49,8 @@ async def shutdown_event():
 
 
 # Rotas
-app.include_router(auth_router, prefix="/api/v1")
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(quests_router, prefix="/api/v1/quests", tags=["quests"])
 
 
 # Health check

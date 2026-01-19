@@ -1,7 +1,7 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
-// Definição da URL base (suporta Next.js e Vite)
-const API_URL = process.env.NEXT_PUBLIC_API_URL || (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+// Definição da URL base (Vite Standard)
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // Configuração da instância Axios
 const api: AxiosInstance = axios.create({
