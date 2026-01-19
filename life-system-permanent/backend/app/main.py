@@ -49,7 +49,7 @@ async def shutdown_event():
 
 
 # Rotas
-app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(auth_router, prefix="/api/v1")
 app.include_router(quests_router, prefix="/api/v1/quests", tags=["quests"])
 
 
