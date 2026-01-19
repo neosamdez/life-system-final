@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 
 // Definição da URL base (Vite Standard)
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || "https://life-system-backend.onrender.com";
 
 // Configuração da instância Axios
 const api: AxiosInstance = axios.create({
