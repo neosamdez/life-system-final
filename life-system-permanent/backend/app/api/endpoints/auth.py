@@ -11,7 +11,7 @@ from backend.app.services import AuthService
 from backend.app.api.dependencies import get_current_user
 from backend.app.models import User
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(tags=["auth"])
 
 
 @router.post("/register", response_model=UserResponse)
