@@ -41,6 +41,10 @@ export const authService = {
         const response = await api.post('/api/v1/auth/register', userData);
         return response.data;
     },
+    getMe: async (): Promise<any> => {
+        const response = await api.get('/api/v1/auth/me');
+        return response.data;
+    },
     logout: () => {
         if (typeof window !== 'undefined') {
             localStorage.removeItem('token');

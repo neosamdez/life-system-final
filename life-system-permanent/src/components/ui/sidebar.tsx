@@ -22,6 +22,8 @@ import { cn } from "@/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, VariantProps } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
+"use client";
+
 import * as React from "react";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
