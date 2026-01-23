@@ -14,7 +14,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
   });
@@ -25,15 +25,28 @@ export default function RegisterPage() {
 
     try {
       await authService.register({
+        username: formData.username,
         email: formData.email,
         password: formData.password,
-        full_name: formData.name,
       });
       toast.success("Account created successfully! Please login.");
       router.push("/auth/login");
     } catch (error: any) {
       console.error("Register error:", error);
-      toast.error(error.response?.data?.detail || "Failed to create account. Please try again.");
+      let errorMessage = "Failed to create account. Please try again.";
+      
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (typeof detail === "string") {
+          errorMessage = detail;
+        } else if (Array.isArray(detail)) {
+          errorMessage = detail.map((err: any) => err.msg || JSON.stringify(err)).join(", ");
+        } else {
+            errorMessage = JSON.stringify(detail);
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -55,10 +68,10 @@ export default function RegisterPage() {
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Full Name"
+                  placeholder="Username"
                   className="pl-9 bg-background/50"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   required
                 />
               </div>

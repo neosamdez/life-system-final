@@ -29,7 +29,20 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Login error:", error);
-      toast.error(error.response?.data?.detail || "Failed to login. Please check your credentials.");
+      let errorMessage = "Failed to login. Please check your credentials.";
+      
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (typeof detail === "string") {
+          errorMessage = detail;
+        } else if (Array.isArray(detail)) {
+          errorMessage = detail.map((err: any) => err.msg || JSON.stringify(err)).join(", ");
+        } else {
+            errorMessage = JSON.stringify(detail);
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
