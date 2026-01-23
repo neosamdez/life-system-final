@@ -17,16 +17,10 @@ app = FastAPI(
 )
 
 # CORS - Permite requisições do frontend
-origins = [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "https://localhost:3000",
-    os.getenv("FRONTEND_URL", "http://localhost:3000"),
-]
-
+# CORS - Permite requisições do frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
