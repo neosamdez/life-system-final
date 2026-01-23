@@ -98,6 +98,7 @@ export default function RegisterPage() {
                   className="pl-9 bg-background/50"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  maxLength={70}
                   required
                 />
               </div>
