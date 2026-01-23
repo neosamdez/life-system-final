@@ -4,7 +4,7 @@ import axios, { AxiosInstance } from 'axios';
 // Fallback seguro para evitar undefined
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-console.log('🔗 API conectada em:', API_URL);
+console.log("🔌 API URL:", process.env.NEXT_PUBLIC_API_URL || "Using fallback");
 
 const api: AxiosInstance = axios.create({
     baseURL: API_URL,
