@@ -1,21 +1,13 @@
-"use client";
-
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from "streamdown";
+import Link from 'next/link';
 
 export default function Home() {
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="p-4">
-        <Loader2 className="animate-spin" />
-        Example Page
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <h1 className="text-4xl font-bold mb-8">Life System</h1>
+      <div className="flex gap-4">
+        <Link href="/auth/login" className="px-4 py-2 bg-blue-600 text-white rounded">Login</Link>
+        <Link href="/auth/register" className="px-4 py-2 bg-green-600 text-white rounded">Register</Link>
+      </div>
+    </main>
   );
 }
