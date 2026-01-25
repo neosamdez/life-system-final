@@ -43,29 +43,16 @@ class UserResponse(BaseModel):
 
 # ============== PLAYER STATS ==============
 
-class AttributeStatsResponse(BaseModel):
-    """Schema de resposta de um atributo."""
-    level: int
-    xp: int
-    xp_to_next_level: int
-    progress_percentage: float
-
-
 class PlayerStatsResponse(BaseModel):
     """Schema de resposta de estatísticas do jogador."""
     id: int
     user_id: int
     level: int
-    total_xp: int
-    strength: AttributeStatsResponse
-    intelligence: AttributeStatsResponse
-    charisma: AttributeStatsResponse
-    vitality: AttributeStatsResponse
-    wisdom: AttributeStatsResponse
-    agility: AttributeStatsResponse
-    quests_completed: int
-    streak_days: int
-    last_activity: Optional[datetime]
+    current_xp: int
+    hp: int
+    strength: int
+    intelligence: int
+    focus: int
     
     class Config:
         from_attributes = True
@@ -75,36 +62,28 @@ class PlayerStatsResponse(BaseModel):
 
 class QuestDifficultyEnum(str, Enum):
     """Enum de dificuldade."""
-    EASY = "easy"
-    MEDIUM = "medium"
-    HARD = "hard"
-    EPIC = "epic"
+    E = "E"
+    D = "D"
+    C = "C"
+    B = "B"
+    A = "A"
+    S = "S"
 
 
-class QuestStatusEnum(str, Enum):
-    """Enum de status."""
-    ACTIVE = "active"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-
-
-class AttributeEnum(str, Enum):
-    """Enum de atributos."""
-    STRENGTH = "strength"
-    INTELLIGENCE = "intelligence"
-    CHARISMA = "charisma"
-    VITALITY = "vitality"
-    WISDOM = "wisdom"
-    AGILITY = "agility"
+class AttributeRewardEnum(str, Enum):
+    """Enum de recompensa de atributo."""
+    STR = "STR"
+    INT = "INT"
+    FOC = "FOC"
 
 
 class QuestCreate(BaseModel):
     """Schema para criar quest."""
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
-    difficulty: QuestDifficultyEnum = QuestDifficultyEnum.MEDIUM
-    attribute: AttributeEnum
+    difficulty: QuestDifficultyEnum = QuestDifficultyEnum.E
+    xp_reward: int = Field(..., ge=0)
+    attribute_reward: Optional[AttributeRewardEnum] = None
     due_date: Optional[datetime] = None
 
 
@@ -114,10 +93,10 @@ class QuestResponse(BaseModel):
     user_id: int
     title: str
     description: Optional[str]
-    difficulty: str
-    attribute: str
-    status: str
+    difficulty: QuestDifficultyEnum
     xp_reward: int
+    attribute_reward: Optional[AttributeRewardEnum]
+    is_completed: bool
     due_date: Optional[datetime]
     completed_at: Optional[datetime]
     created_at: datetime
@@ -130,7 +109,6 @@ class QuestCompleteResponse(BaseModel):
     """Schema de resposta ao completar quest."""
     quest: QuestResponse
     xp_gained: int
-    attribute_updated: str
     level_up: bool
     new_level: Optional[int]
     old_level: Optional[int]
@@ -139,66 +117,29 @@ class QuestCompleteResponse(BaseModel):
 
 # ============== FINANCE ==============
 
-class TransactionTypeEnum(str, Enum):
-    """Enum de tipo de transação."""
-    INCOME = "income"
-    EXPENSE = "expense"
+class FinanceTypeEnum(str, Enum):
+    """Enum de tipo de finança."""
+    INCOME = "INCOME"
+    EXPENSE = "EXPENSE"
 
 
-class TransactionCreate(BaseModel):
-    """Schema para criar transação."""
-    description: str = Field(..., min_length=1, max_length=255)
+class FinanceLogCreate(BaseModel):
+    """Schema para criar registro financeiro."""
+    type: FinanceTypeEnum
     amount: float = Field(..., gt=0)
-    type: TransactionTypeEnum
     category: str = Field(..., min_length=1, max_length=100)
-    date: Optional[datetime] = None
+    description: Optional[str] = None
 
 
-class TransactionResponse(BaseModel):
-    """Schema de resposta de transação."""
+class FinanceLogResponse(BaseModel):
+    """Schema de resposta de registro financeiro."""
     id: int
     user_id: int
-    description: str
+    type: FinanceTypeEnum
     amount: float
-    type: str
     category: str
-    date: datetime
+    description: Optional[str]
     created_at: datetime
     
     class Config:
         from_attributes = True
-
-
-class CategorySummary(BaseModel):
-    """Schema de resumo por categoria."""
-    category: str
-    total: float
-    percentage: float
-    count: int
-
-
-class FinanceSummary(BaseModel):
-    """Schema de resumo financeiro."""
-    total_income: float
-    total_expense: float
-    balance: float
-    income_by_category: list[CategorySummary]
-    expense_by_category: list[CategorySummary]
-    transaction_count: int
-    period: str
-
-
-class MonthlyTrend(BaseModel):
-    """Schema de tendência mensal."""
-    month: str
-    year: int
-    income: float
-    expense: float
-    balance: float
-
-
-class FinanceTrends(BaseModel):
-    """Schema de tendências financeiras."""
-    trends: list[MonthlyTrend]
-    average_income: float
-    average_expense: float

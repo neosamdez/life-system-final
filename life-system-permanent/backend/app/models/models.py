@@ -5,7 +5,6 @@ SQLAlchemy Models - Definição das tabelas do banco de dados
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey, Enum, Text, Numeric
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from datetime import datetime
 import enum
 
 from backend.app.core import Base
@@ -26,7 +25,7 @@ class User(Base):
     # Relationships
     player_stats = relationship("PlayerStats", back_populates="user", uselist=False, cascade="all, delete-orphan")
     quests = relationship("Quest", back_populates="user", cascade="all, delete-orphan")
-    transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
+    finance_logs = relationship("FinanceLog", back_populates="user", cascade="all, delete-orphan")
 
 
 class PlayerStats(Base):
@@ -35,34 +34,16 @@ class PlayerStats(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    
+    # Core RPG Stats
     level = Column(Integer, default=1)
-    total_xp = Column(Integer, default=0)
+    current_xp = Column(Integer, default=0)
+    hp = Column(Integer, default=100)
     
-    # Atributos individuais
-    strength_level = Column(Integer, default=1)
-    strength_xp = Column(Integer, default=0)
-    
-    intelligence_level = Column(Integer, default=1)
-    intelligence_xp = Column(Integer, default=0)
-    
-    charisma_level = Column(Integer, default=1)
-    charisma_xp = Column(Integer, default=0)
-    
-    vitality_level = Column(Integer, default=1)
-    vitality_xp = Column(Integer, default=0)
-    
-    wisdom_level = Column(Integer, default=1)
-    wisdom_xp = Column(Integer, default=0)
-    
-    agility_level = Column(Integer, default=1)
-    agility_xp = Column(Integer, default=0)
-    
-    # Streak
-    streak_days = Column(Integer, default=0)
-    last_activity = Column(DateTime, nullable=True)
-    
-    # Quests
-    quests_completed = Column(Integer, default=0)
+    # Attributes
+    strength = Column(Integer, default=1)
+    intelligence = Column(Integer, default=1)
+    focus = Column(Integer, default=1)
     
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -73,28 +54,19 @@ class PlayerStats(Base):
 
 class QuestDifficultyEnum(str, enum.Enum):
     """Enum de dificuldade de quest."""
-    EASY = "easy"
-    MEDIUM = "medium"
-    HARD = "hard"
-    EPIC = "epic"
+    E = "E"
+    D = "D"
+    C = "C"
+    B = "B"
+    A = "A"
+    S = "S"
 
 
-class QuestStatusEnum(str, enum.Enum):
-    """Enum de status de quest."""
-    ACTIVE = "active"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-
-
-class AttributeEnum(str, enum.Enum):
-    """Enum de atributos."""
-    STRENGTH = "strength"
-    INTELLIGENCE = "intelligence"
-    CHARISMA = "charisma"
-    VITALITY = "vitality"
-    WISDOM = "wisdom"
-    AGILITY = "agility"
+class AttributeRewardEnum(str, enum.Enum):
+    """Enum de recompensa de atributo."""
+    STR = "STR"
+    INT = "INT"
+    FOC = "FOC"
 
 
 class Quest(Base):
@@ -103,14 +75,17 @@ class Quest(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
-    difficulty = Column(Enum(QuestDifficultyEnum), default=QuestDifficultyEnum.MEDIUM)
-    attribute = Column(Enum(AttributeEnum), nullable=False)
-    status = Column(Enum(QuestStatusEnum), default=QuestStatusEnum.ACTIVE)
+    difficulty = Column(Enum(QuestDifficultyEnum), default=QuestDifficultyEnum.E)
     xp_reward = Column(Integer, default=0)
+    attribute_reward = Column(Enum(AttributeRewardEnum), nullable=True)
+    
+    is_completed = Column(Boolean, default=False)
     due_date = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
+    
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
     
@@ -118,25 +93,26 @@ class Quest(Base):
     user = relationship("User", back_populates="quests")
 
 
-class TransactionTypeEnum(str, enum.Enum):
-    """Enum de tipo de transação."""
-    INCOME = "income"
-    EXPENSE = "expense"
+class FinanceTypeEnum(str, enum.Enum):
+    """Enum de tipo de finança."""
+    INCOME = "INCOME"
+    EXPENSE = "EXPENSE"
 
 
-class Transaction(Base):
-    """Modelo de transação financeira."""
-    __tablename__ = "transactions"
+class FinanceLog(Base):
+    """Modelo de registro financeiro."""
+    __tablename__ = "finance_logs"
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    description = Column(String(255), nullable=False)
-    amount = Column(Numeric(10, 2), nullable=False)
-    type = Column(Enum(TransactionTypeEnum), nullable=False)
+    
+    type = Column(Enum(FinanceTypeEnum), nullable=False)
+    amount = Column(Float, nullable=False)
     category = Column(String(100), nullable=False)
-    date = Column(DateTime, nullable=False, default=func.now())
+    description = Column(String(255), nullable=True)
+    
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
     
     # Relationships
-    user = relationship("User", back_populates="transactions")
+    user = relationship("User", back_populates="finance_logs")

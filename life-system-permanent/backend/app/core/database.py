@@ -25,8 +25,7 @@ engine = create_async_engine(
     pool_pre_ping=True,
     pool_size=20,
     max_overflow=0,
-    # 👇 ESTA LINHA SALVA O DIA: Desativa cache de statements para compatibilidade com Supabase
-    connect_args={"statement_cache_size": 0},
+    connect_args={"statement_cache_size": 0} if "postgresql" in DATABASE_URL else {},
 )
 
 # Session factory
