@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Clock, AlertTriangle, Zap } from 'lucide-react';
 import { Quest } from '@/services/gamification';
 
 interface QuestBoardProps {
