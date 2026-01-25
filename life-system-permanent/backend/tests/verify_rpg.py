@@ -102,7 +102,7 @@ def run_test():
 
     # 7. Finance
     print("Creating Transaction...")
-    txn = request("POST", "/transactions", {
+    txn = request("POST", "/finance/transactions", {
         "type": "INCOME",
         "amount": 1000.50,
         "category": "Salary",
@@ -111,7 +111,7 @@ def run_test():
     print(f"Transaction created: {txn['id']}")
     
     print("Listing Transactions...")
-    txns = request("GET", "/transactions", token=token)
+    txns = request("GET", "/finance/transactions", token=token)
     print(f"Found {len(txns)} transactions")
     if len(txns) < 1:
         print("FAIL: Expected at least 1 transaction")

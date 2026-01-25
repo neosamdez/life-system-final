@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.core import init_db, close_db
-from backend.app.api import auth_router, gamification_router, finance_router
+from backend.app.api.v1.api import api_router
 
 # Cria aplicação FastAPI
 app = FastAPI(
@@ -16,7 +16,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS - Permite requisições do frontend
 # CORS - Permite requisições do frontend
 app.add_middleware(
     CORSMiddleware,
@@ -43,9 +42,7 @@ async def shutdown_event():
 
 
 # Rotas
-app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
-app.include_router(gamification_router, prefix="/api/v1", tags=["gamification"])
-app.include_router(finance_router, prefix="/api/v1", tags=["finance"])
+app.include_router(api_router, prefix="/api/v1")
 
 
 # Health check

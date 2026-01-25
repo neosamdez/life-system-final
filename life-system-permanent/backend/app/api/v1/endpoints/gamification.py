@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 from datetime import datetime
 
 from backend.app.core import get_db
-from backend.app.api.dependencies import get_current_user
+from backend.app.api.v1.dependencies import get_current_user
 from backend.app.models import User, PlayerStats, Quest, QuestDifficultyEnum, AttributeRewardEnum
 from backend.app.schemas import (
     PlayerStatsResponse,

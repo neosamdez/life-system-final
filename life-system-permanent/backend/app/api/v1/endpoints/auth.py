@@ -8,10 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.core import get_db
 from backend.app.schemas import UserRegister, UserLogin, TokenResponse, UserResponse
 from backend.app.services import AuthService
-from backend.app.api.dependencies import get_current_user
+from backend.app.api.v1.dependencies import get_current_user
 from backend.app.models import User
 
-router = APIRouter(tags=["auth"])
+router = APIRouter()
 
 
 @router.post("/register", response_model=UserResponse)
