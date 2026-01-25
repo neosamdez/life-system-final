@@ -38,6 +38,20 @@ async def get_stats(
         
     return stats
 
+@router.get("/quests", response_model=list[QuestResponse])
+async def get_quests(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Lista quests ativas do usuário."""
+    stmt = select(Quest).where(
+        Quest.user_id == current_user.id,
+        Quest.is_completed == False
+    ).order_by(Quest.created_at.desc())
+    result = await db.execute(stmt)
+    quests = result.scalars().all()
+    return quests
+
 @router.post("/quests", response_model=QuestResponse)
 async def create_quest(
     quest_in: QuestCreate,

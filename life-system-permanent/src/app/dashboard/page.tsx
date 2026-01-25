@@ -1,130 +1,115 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Sword, Shield, Zap, Heart } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import PlayerStatus from '@/components/dashboard/PlayerStatus';
+import QuestBoard from '@/components/dashboard/QuestBoard';
+import { gamificationService, PlayerStats, Quest } from '@/services/gamification';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
-  // Mock data for now
-  const playerStats = {
-    level: 1,
-    xp: 450,
-    xpRequired: 1000,
-    hp: 100,
-    maxHp: 100,
-    mp: 50,
-    maxMp: 50,
-    strength: 10,
-    agility: 8,
-    intelligence: 5,
+  const router = useRouter();
+  const [stats, setStats] = useState<PlayerStats | null>(null);
+  const [quests, setQuests] = useState<Quest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [levelUp, setLevelUp] = useState<{ show: boolean; level: number }>({ show: false, level: 0 });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/auth/login');
+        return;
+      }
+
+      try {
+        const [statsData, questsData] = await Promise.all([
+          gamificationService.getStats(token),
+          gamificationService.getQuests(token)
+        ]);
+        setStats(statsData);
+        setQuests(questsData);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [router]);
+
+  const handleCompleteQuest = async (questId: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await gamificationService.completeQuest(questId, token);
+      
+      // Update local state
+      setQuests(prev => prev.filter(q => q.id !== questId));
+      
+      // Refresh stats
+      const newStats = await gamificationService.getStats(token);
+      setStats(newStats);
+
+      // Check for Level Up
+      if (response.level_up && response.new_level) {
+        setLevelUp({ show: true, level: response.new_level });
+        setTimeout(() => setLevelUp({ show: false, level: 0 }), 3000);
+      }
+    } catch (error) {
+      console.error('Failed to complete quest:', error);
+    }
   };
 
-  const xpPercentage = (playerStats.xp / playerStats.xpRequired) * 100;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0B0C10] flex items-center justify-center text-[#45A29E]">
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          className="w-12 h-12 border-4 border-[#45A29E] border-t-transparent rounded-full"
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Welcome back, Hunter</h2>
-        <p className="text-muted-foreground">Ready to complete your daily quests?</p>
-      </div>
+    <div className="min-h-screen bg-[#0B0C10] text-white p-4 md:p-8 font-sans selection:bg-[#45A29E] selection:text-black">
+      {/* Level Up Overlay */}
+      {levelUp.show && (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        >
+          <div className="text-center">
+            <h1 className="text-[#FFD700] text-6xl font-bold mb-4 animate-pulse">LEVEL UP!</h1>
+            <p className="text-white text-2xl">You have reached Level {levelUp.level}</p>
+          </div>
+        </motion.div>
+      )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Level</CardTitle>
-            <TrophyIcon className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{playerStats.level}</div>
-            <p className="text-xs text-muted-foreground">
-              {playerStats.xp} / {playerStats.xpRequired} XP
-            </p>
-            <Progress value={xpPercentage} className="mt-2 h-2" />
-          </CardContent>
-        </Card>
+      <header className="mb-8 border-b border-[#45A29E]/30 pb-4">
+        <h1 className="text-3xl font-bold text-white">
+          <span className="text-[#45A29E]">SYSTEM</span> DASHBOARD
+        </h1>
+        <p className="text-gray-400 text-sm mt-1">Daily Quests: Player Neosam</p>
+      </header>
 
-        <Card className="bg-card/50 backdrop-blur-sm border-red-500/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Health</CardTitle>
-            <Heart className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{playerStats.hp} / {playerStats.maxHp}</div>
-            <Progress value={(playerStats.hp / playerStats.maxHp) * 100} className="mt-2 h-2 bg-red-950 [&>div]:bg-red-500" />
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Player Stats */}
+        <div className="lg:col-span-1">
+          <PlayerStatus stats={stats} />
+        </div>
 
-        <Card className="bg-card/50 backdrop-blur-sm border-blue-500/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mana</CardTitle>
-            <Zap className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{playerStats.mp} / {playerStats.maxMp}</div>
-            <Progress value={(playerStats.mp / playerStats.maxMp) * 100} className="mt-2 h-2 bg-blue-950 [&>div]:bg-blue-500" />
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card/50 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Stats</CardTitle>
-            <Sword className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="flex items-center gap-1">
-                <Sword className="h-3 w-3 text-red-400" /> STR: {playerStats.strength}
-              </div>
-              <div className="flex items-center gap-1">
-                <Shield className="h-3 w-3 text-blue-400" /> AGI: {playerStats.agility}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Active Quests</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">No active quests. Check the Quest Board.</p>
-          </CardContent>
-        </Card>
-        <Card className="col-span-3 bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">You logged in.</p>
-          </CardContent>
-        </Card>
+        {/* Right Column: Quest Board */}
+        <div className="lg:col-span-2">
+          <QuestBoard quests={quests} onComplete={handleCompleteQuest} />
+        </div>
       </div>
     </div>
   );
-}
-
-function TrophyIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-      <path d="M4 22h16" />
-      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-    </svg>
-  )
 }
