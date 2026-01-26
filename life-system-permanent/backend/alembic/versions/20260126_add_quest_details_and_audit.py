@@ -21,10 +21,10 @@ def upgrade() -> None:
     # op.add_column('quests', sa.Column('is_completed', sa.Boolean(), server_default='false', nullable=True))
     # op.add_column('quests', sa.Column('due_date', sa.DateTime(), nullable=True))
     # op.add_column('quests', sa.Column('completed_at', sa.DateTime(), nullable=True))
-    op.add_column('quests', sa.Column('status', sa.String(), server_default='available', nullable=True))
+    # op.add_column('quests', sa.Column('status', sa.String(), server_default='available', nullable=True))
     
     # Add columns to player_stats
-    op.add_column('player_stats', sa.Column('quests_completed', sa.Integer(), server_default='0', nullable=True))
+    # op.add_column('player_stats', sa.Column('quests_completed', sa.Integer(), server_default='0', nullable=True))
 
 
 def downgrade() -> None:
