@@ -14,7 +14,7 @@ revision = 'add_quest_attr_001'
 
 # ATENÇÃO: Aqui conectamos na migration anterior (aquela do XP)
 # Se você copiou meu código anterior, o ID era 'add_current_xp_001'
-down_revision = '274616c98a4f'
+down_revision = 'add_current_xp_001'
 
 branch_labels = None
 depends_on = None
