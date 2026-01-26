@@ -54,7 +54,7 @@ async def complete_quest(
     # 3. Atualiza status da quest
     quest.status = QuestStatusEnum.COMPLETED
     quest.xp_reward = xp_reward # Salva quanto valeu
-    # quest.completed_at = func.now() # Opcional, se tiver o campo
+    quest.completed_at = func.now() # Opcional, se tiver o campo
     
     # 4. Atualiza PlayerStats
     # Busca stats do jogador
@@ -65,11 +65,11 @@ async def complete_quest(
     
     if not player_stats:
         # Se não existir (erro de integridade, mas vamos prevenir), cria um
-        player_stats = PlayerStats(user_id=current_user.id, level=1, total_xp=0)
+        player_stats = PlayerStats(user_id=current_user.id, level=1, current_xp=0)
         db.add(player_stats)
     
     # Adiciona XP
-    player_stats.total_xp += xp_reward
+    player_stats.current_xp += xp_reward
     player_stats.quests_completed += 1
     
     # 5. Lógica de Level Up
@@ -80,7 +80,7 @@ async def complete_quest(
     level_up = False
     new_level = current_level
     
-    if player_stats.total_xp >= xp_threshold:
+    if player_stats.current_xp >= xp_threshold:
         level_up = True
         player_stats.level += 1
         new_level = player_stats.level
@@ -88,7 +88,7 @@ async def complete_quest(
         # Ajuste do XP: "resete/ajuste". 
         # Vamos subtrair o custo do nível para manter o excedente (padrão RPG justo)
         # Ex: Nível 1 (precisa 100). Tem 120. Upa para 2. Sobra 20.
-        player_stats.total_xp = player_stats.total_xp - xp_threshold
+        player_stats.current_xp = player_stats.current_xp - xp_threshold
         
     # Salva tudo
     await db.commit()
@@ -100,6 +100,6 @@ async def complete_quest(
         "level_up": level_up,
         "new_level": new_level,
         "xp_gained": xp_reward,
-        "current_xp": player_stats.total_xp,
+        "current_xp": player_stats.current_xp,
         "next_level_xp": new_level * 100
     }

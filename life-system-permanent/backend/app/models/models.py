@@ -52,6 +52,8 @@ class PlayerStats(Base):
     intelligence = Column(Integer, default=1)
     focus = Column(Integer, default=1)
     
+    quests_completed = Column(Integer, default=0)
+    
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
     
@@ -89,6 +91,7 @@ class Quest(Base):
     xp_reward = Column(Integer, default=0)
     attribute_reward = Column(Enum(AttributeRewardEnum), nullable=True)
     
+    status = Column(Enum(QuestStatusEnum), default=QuestStatusEnum.AVAILABLE)
     is_completed = Column(Boolean, default=False)
     due_date = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
