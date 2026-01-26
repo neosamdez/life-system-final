@@ -31,7 +31,7 @@ class AuthService:
         user = User(
             email=user_data.email,
             username=user_data.username,
-            hashed_password=hash_password(user_data.password),
+            hashed_password=hash_password(user_data.password[:72]),
         )
         db.add(user)
         await db.flush()
