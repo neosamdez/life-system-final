@@ -5,11 +5,11 @@ Auth Endpoints - Endpoints de autenticação
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core import get_db
-from backend.app.schemas import UserRegister, UserLogin, TokenResponse, UserResponse
-from backend.app.services import AuthService
-from backend.app.api.v1.dependencies import get_current_user
-from backend.app.models import User
+from app.core import get_db
+from app.schemas import UserRegister, UserLogin, TokenResponse, UserResponse
+from app.services import AuthService
+from app.api.v1.dependencies import get_current_user
+from app.models import User
 
 router = APIRouter()
 

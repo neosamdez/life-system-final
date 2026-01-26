@@ -3,10 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List
 
-from backend.app.core import get_db
-from backend.app.api.v1.dependencies import get_current_user
-from backend.app.models import User, FinanceLog, FinanceTypeEnum
-from backend.app.schemas import FinanceLogCreate, FinanceLogResponse
+from app.core import get_db
+from app.api.v1.dependencies import get_current_user
+from app.models import User, FinanceLog, FinanceTypeEnum
+from app.schemas import FinanceLogCreate, FinanceLogResponse
 
 router = APIRouter()
 

@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import Any
 
-from backend.app.core.database import get_db
-from backend.app.models import User, Quest, PlayerStats, QuestStatusEnum
-from backend.app.api.dependencies import get_current_user
+from app.core.database import get_db
+from app.models import User, Quest, PlayerStats, QuestStatusEnum
+from app.api.v1.dependencies import get_current_user
 
 router = APIRouter()
 

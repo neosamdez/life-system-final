@@ -10,10 +10,10 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 # Add project root to python path to import backend modules
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import Base from app models
-from backend.app.core.database import Base, DATABASE_URL  # noqa
+from app.core.database import Base, DATABASE_URL  # noqa
 # Import config to ensure env vars are loaded (if using python-dotenv in config)
 # Or just load dotenv here if needed.
 # Assuming DATABASE_URL is in env or loaded via app.core.config/database

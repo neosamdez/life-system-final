@@ -6,13 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import timedelta
 
-from backend.app.models import User, PlayerStats
-from backend.app.core.security import (
-    hash_password,
-    verify_password,
-    create_access_token,
-)
-from backend.app.schemas import UserRegister, TokenResponse
+from app.models import User, PlayerStats
+from app.core import get_password_hash, verify_password, create_access_token
+from app.schemas import UserRegister, TokenResponse
 
 
 class AuthService:
