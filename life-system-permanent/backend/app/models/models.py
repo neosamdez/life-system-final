@@ -10,6 +10,13 @@ import enum
 from app.core import Base
 
 
+class QuestStatusEnum(str, enum.Enum):
+    AVAILABLE = "available"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
 class User(Base):
     """Modelo de usuário."""
     __tablename__ = "users"
