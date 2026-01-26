@@ -28,8 +28,8 @@ app.add_middleware(
     CORSMiddleware,
     # Permite origens específicas
     allow_origins=origins,
-    # Permite QUALQUER subdomínio da Vercel (Preview e Production)
-    allow_origin_regex="https://.*\.vercel\.app", 
+    # Permite QUALQUER subdomínio da Vercel (Preview e Production) e Localhost
+    allow_origin_regex=r"https://.*\.vercel\.app|http://localhost:\d+", 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
