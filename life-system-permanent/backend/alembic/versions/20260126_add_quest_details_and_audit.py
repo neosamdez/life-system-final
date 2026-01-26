@@ -18,9 +18,9 @@ depends_on = None
 
 def upgrade() -> None:
     # Add columns to quests
-    op.add_column('quests', sa.Column('is_completed', sa.Boolean(), server_default='false', nullable=True))
-    op.add_column('quests', sa.Column('due_date', sa.DateTime(), nullable=True))
-    op.add_column('quests', sa.Column('completed_at', sa.DateTime(), nullable=True))
+    # op.add_column('quests', sa.Column('is_completed', sa.Boolean(), server_default='false', nullable=True))
+    # op.add_column('quests', sa.Column('due_date', sa.DateTime(), nullable=True))
+    # op.add_column('quests', sa.Column('completed_at', sa.DateTime(), nullable=True))
     op.add_column('quests', sa.Column('status', sa.String(), server_default='available', nullable=True))
     
     # Add columns to player_stats
@@ -31,6 +31,6 @@ def downgrade() -> None:
     # Remove columns
     op.drop_column('player_stats', 'quests_completed')
     op.drop_column('quests', 'status')
-    op.drop_column('quests', 'completed_at')
-    op.drop_column('quests', 'due_date')
-    op.drop_column('quests', 'is_completed')
+    # op.drop_column('quests', 'completed_at')
+    # op.drop_column('quests', 'due_date')
+    # op.drop_column('quests', 'is_completed')
