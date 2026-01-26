@@ -16,15 +16,25 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS - Permite requisições do frontend
+# --- CONFIGURAÇÃO DE CORS BLINDADA ---
+# Define origens permitidas explicitamente
+origins = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "https://life-system-final.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    # Permite origens específicas
+    allow_origins=origins,
+    # Permite QUALQUER subdomínio da Vercel (Preview e Production)
+    allow_origin_regex="https://.*\.vercel\.app", 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+# -------------------------------------
 
 # Eventos de startup e shutdown
 @app.on_event("startup")
@@ -32,6 +42,12 @@ async def startup_event():
     """Inicializa o banco de dados ao iniciar."""
     await init_db()
     print("✅ Banco de dados inicializado")
+    
+    # DEBUG: Lista todas as rotas para garantir que /register existe
+    print("🔍 Rotas carregadas:")
+    for route in app.routes:
+        if hasattr(route, "path"):
+            print(f"   - {route.path}")
 
 
 @app.on_event("shutdown")
@@ -41,7 +57,7 @@ async def shutdown_event():
     print("❌ Conexões fechadas")
 
 
-# Rotas
+# Rotas da API
 app.include_router(api_router, prefix="/api/v1")
 
 
