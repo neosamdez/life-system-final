@@ -32,7 +32,8 @@ class User(Base):
     # Relationships
     player_stats = relationship("PlayerStats", back_populates="user", uselist=False, cascade="all, delete-orphan")
     quests = relationship("Quest", back_populates="user", cascade="all, delete-orphan")
-    finance_logs = relationship("FinanceLog", back_populates="user", cascade="all, delete-orphan")
+    finance_transactions = relationship("FinanceTransaction", back_populates="user", cascade="all, delete-orphan")
+    body_metrics = relationship("BodyMetric", back_populates="user", cascade="all, delete-orphan")
 
 
 class PlayerStats(Base):
@@ -78,6 +79,13 @@ class AttributeRewardEnum(str, enum.Enum):
     FOC = "FOC"
 
 
+class QuestCategoryEnum(str, enum.Enum):
+    """Enum de categoria de quest."""
+    DAILY = "Daily"
+    STORY = "Story"
+    SIDE_QUEST = "Side-Quest"
+
+
 class Quest(Base):
     """Modelo de quest."""
     __tablename__ = "quests"
@@ -88,8 +96,14 @@ class Quest(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     difficulty = Column(Enum(QuestDifficultyEnum), default=QuestDifficultyEnum.E)
+    category = Column(Enum(QuestCategoryEnum), default=QuestCategoryEnum.SIDE_QUEST)
+    
     xp_reward = Column(Integer, default=0)
     attribute_reward = Column(Enum(AttributeRewardEnum), nullable=True)
+    
+    # Hardcore Mode / Punishment
+    penalty_hp = Column(Integer, default=0, comment="HP lost if failed/missed")
+    is_healing = Column(Boolean, default=False, comment="If True, restores HP on completion")
     
     status = Column(Enum(QuestStatusEnum), default=QuestStatusEnum.AVAILABLE)
     is_completed = Column(Boolean, default=False)
@@ -109,9 +123,9 @@ class FinanceTypeEnum(str, enum.Enum):
     EXPENSE = "EXPENSE"
 
 
-class FinanceLog(Base):
-    """Modelo de registro financeiro."""
-    __tablename__ = "finance_logs"
+class FinanceTransaction(Base):
+    """Modelo de transação financeira (The Wallet)."""
+    __tablename__ = "finance_transactions"
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -121,8 +135,37 @@ class FinanceLog(Base):
     category = Column(String(100), nullable=False)
     description = Column(String(255), nullable=True)
     
+    date = Column(DateTime, server_default=func.now(), nullable=False)
+    is_fixed = Column(Boolean, default=False, comment="Recurring monthly bill")
+    
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
     
     # Relationships
-    user = relationship("User", back_populates="finance_logs")
+    user = relationship("User", back_populates="finance_transactions")
+
+
+class BodyMetric(Base):
+    """Modelo de métricas corporais (Solo Leveling Growth)."""
+    __tablename__ = "body_metrics"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    date = Column(DateTime, server_default=func.now(), nullable=False)
+    weight = Column(Float, nullable=False)
+    muscle_mass = Column(Float, nullable=True)
+    fat_percentage = Column(Float, nullable=True)
+    photo_url = Column(String(255), nullable=True)
+    
+    created_at = Column(DateTime, server_default=func.now())
+    
+    # Relationships
+    user = relationship("User", back_populates="body_metrics")
+
+# Punishment System Logic (Plan):
+# A background task (Celery/APScheduler) or a check on User Login will:
+# 1. Query all 'DAILY' quests where due_date < now() AND status != COMPLETED.
+# 2. For each missed quest, deduct 'penalty_hp' from User.player_stats.hp.
+# 3. If HP <= 0, trigger 'Death' state (level down or xp loss).
+# 4. Mark quest as FAILED.

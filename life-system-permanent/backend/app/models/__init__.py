@@ -4,20 +4,24 @@ from .models import (
     User,
     PlayerStats,
     Quest,
-    FinanceLog,
+    FinanceTransaction,
+    BodyMetric,
     QuestDifficultyEnum,
     AttributeRewardEnum,
     FinanceTypeEnum,
     QuestStatusEnum,
+    QuestCategoryEnum,
 )
 
 __all__ = [
     "User",
     "PlayerStats",
     "Quest",
-    "FinanceLog",
+    "FinanceTransaction",
+    "BodyMetric",
     "QuestDifficultyEnum",
     "AttributeRewardEnum",
     "FinanceTypeEnum",
     "QuestStatusEnum",
+    "QuestCategoryEnum",
 ]

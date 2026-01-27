@@ -16,7 +16,7 @@ import os
 # backend/alembic/versions -> backend
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from app.models.models import User, Quest, PlayerStats, FinanceLog
+from app.models.models import User, Quest, PlayerStats, FinanceTransaction
 
 # revision identifiers, used by Alembic.
 revision: str = '84d23a297c78'
@@ -31,7 +31,7 @@ def upgrade() -> None:
     inspector = Inspector.from_engine(bind)
     
     # List of models to synchronize
-    models = [User, Quest, PlayerStats, FinanceLog]
+    models = [User, Quest, PlayerStats, FinanceTransaction]
     
     existing_tables = inspector.get_table_names()
     
