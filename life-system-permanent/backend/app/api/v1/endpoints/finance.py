@@ -1,44 +1,40 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Any, List
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from typing import List
 
 from app.core.database import get_db
+from app import crud, schemas
 from app.api.v1.dependencies import get_current_user
-from app.models import User, FinanceLog, FinanceTypeEnum
-from app.schemas import FinanceLogCreate, FinanceLogResponse
+from app.models import User
 
 router = APIRouter()
 
-@router.get("/transactions", response_model=List[FinanceLogResponse])
-async def get_transactions(
+@router.get("/", response_model=List[schemas.FinanceTransactionResponse])
+async def read_finance_transactions(
+    db: AsyncSession = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Lista transações financeiras do usuário."""
-    stmt = select(FinanceLog).where(FinanceLog.user_id == current_user.id).offset(skip).limit(limit).order_by(FinanceLog.created_at.desc())
-    result = await db.execute(stmt)
-    transactions = result.scalars().all()
+) -> Any:
+    """
+    Retrieve finance transactions.
+    """
+    transactions = await crud.finance.get_multi_by_owner(
+        db=db, user_id=current_user.id, skip=skip, limit=limit
+    )
     return transactions
 
-@router.post("/transactions", response_model=FinanceLogResponse)
-async def create_transaction(
-    transaction_in: FinanceLogCreate,
+@router.post("/", response_model=schemas.FinanceTransactionResponse)
+async def create_finance_transaction(
+    *,
+    db: AsyncSession = Depends(get_db),
+    transaction_in: schemas.FinanceTransactionCreate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Cria uma nova transação financeira."""
-    transaction = FinanceLog(
-        user_id=current_user.id,
-        type=transaction_in.type,
-        amount=transaction_in.amount,
-        category=transaction_in.category,
-        description=transaction_in.description
+) -> Any:
+    """
+    Create new finance transaction.
+    """
+    transaction = await crud.finance.create(
+        db=db, obj_in=transaction_in, user_id=current_user.id
     )
-    
-    db.add(transaction)
-    await db.commit()
-    await db.refresh(transaction)
     return transaction
