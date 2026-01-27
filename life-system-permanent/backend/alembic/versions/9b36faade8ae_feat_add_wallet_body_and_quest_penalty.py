@@ -37,7 +37,7 @@ def upgrade() -> None:
             # For simplicity using String or Enum with create_type=False if possible, 
             # but here we define the column.
             # Note: In Postgres, Enums are types. We might need to create the type first.
-            quest_category_enum = sa.Enum('DAILY', 'STORY', 'SIDE_QUEST', name='questcategoryenum')
+            quest_category_enum = sa.Enum('DAILY', 'STORY', 'SIDE_QUEST', name='questcategoryenum', create_type=False)
             quest_category_enum.create(bind, checkfirst=True)
             op.add_column('quests', sa.Column('category', quest_category_enum, nullable=True, default='SIDE_QUEST'))
 
@@ -63,7 +63,7 @@ def upgrade() -> None:
     # 3. Create FinanceTransaction Table
     if 'finance_transactions' not in existing_tables:
         # Check if we need to create the Enum type
-        finance_type_enum = sa.Enum('INCOME', 'EXPENSE', name='financetypeenum')
+        finance_type_enum = sa.Enum('INCOME', 'EXPENSE', name='financetypeenum', create_type=False)
         finance_type_enum.create(bind, checkfirst=True)
 
         op.create_table('finance_transactions',
