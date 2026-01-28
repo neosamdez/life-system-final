@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
-import { Plus } from "lucide-react"
+import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts"
+import { Plus, Activity, Scale, Dumbbell } from "lucide-react"
 import axios from "axios"
 
 import { Button } from "@/components/ui/button"
@@ -78,10 +78,15 @@ export default function BodyPage() {
     muscle: m.muscle_mass
   }))
 
+  const currentWeight = metrics.length > 0 ? metrics[metrics.length - 1].weight : 0
+  const currentMuscle = metrics.length > 0 ? metrics[metrics.length - 1].muscle_mass : 0
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Body Tracker</h1>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <Activity className="h-8 w-8" /> Body Tracker
+        </h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -114,6 +119,27 @@ export default function BodyPage() {
         </Dialog>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Current Weight</CardTitle>
+            <Scale className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currentWeight} kg</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Muscle Mass</CardTitle>
+            <Dumbbell className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currentMuscle || "-"} kg</div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-1">
         <Card>
           <CardHeader>
@@ -128,13 +154,16 @@ export default function BodyPage() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <XAxis dataKey="date" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <XAxis dataKey="date" stroke="#94a3b8" />
+                  <YAxis yAxisId="left" stroke="#94a3b8" />
+                  <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
+                  />
                   <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="weight" stroke="#2563eb" name="Weight (kg)" strokeWidth={2} />
-                  <Line yAxisId="right" type="monotone" dataKey="muscle" stroke="#16a34a" name="Muscle (kg)" strokeWidth={2} />
+                  <Line yAxisId="left" type="monotone" dataKey="weight" stroke="#3b82f6" name="Weight (kg)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                  <Line yAxisId="right" type="monotone" dataKey="muscle" stroke="#22c55e" name="Muscle (kg)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
             )}

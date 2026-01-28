@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
-import { Plus } from "lucide-react"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts"
+import { Plus, Wallet, TrendingUp, TrendingDown, DollarSign } from "lucide-react"
 import axios from "axios"
 
 import { Button } from "@/components/ui/button"
@@ -54,9 +54,6 @@ export default function WalletPage() {
 
   const fetchTransactions = async () => {
     try {
-      // Assuming API proxy is set up or full URL needed. 
-      // Using relative path assuming Next.js rewrites or same domain.
-      // If not, might need env var.
       const response = await axios.get("http://localhost:8000/api/v1/finance/")
       setTransactions(response.data)
     } catch (error) {
@@ -75,8 +72,8 @@ export default function WalletPage() {
       await axios.post("http://localhost:8000/api/v1/finance/", {
         ...data,
         amount: parseFloat(data.amount),
-        date: new Date().toISOString(), // Simple 'now' for date
-        is_fixed: false // Default for now
+        date: new Date().toISOString(),
+        is_fixed: false
       })
       setOpen(false)
       reset()
@@ -101,12 +98,18 @@ export default function WalletPage() {
       })
     }
     return acc
-  }, []).slice(-7) // Last 7 days/entries
+  }, []).slice(-7)
+
+  const totalBalance = transactions.reduce((acc, curr) => {
+    return curr.type === "INCOME" ? acc + curr.amount : acc - curr.amount
+  }, 0)
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Wallet</h1>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <Wallet className="h-8 w-8" /> Wallet
+        </h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -151,8 +154,45 @@ export default function WalletPage() {
         </Dialog>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${totalBalance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              ${totalBalance.toFixed(2)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Income (All Time)</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-500">
+              +${transactions.filter(t => t.type === "INCOME").reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Expenses (All Time)</CardTitle>
+            <TrendingDown className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-500">
+              -${transactions.filter(t => t.type === "EXPENSE").reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="col-span-1">
           <CardHeader>
             <CardTitle>Overview</CardTitle>
             <CardDescription>Income vs Expense (Recent)</CardDescription>
@@ -160,18 +200,21 @@ export default function WalletPage() {
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                <XAxis dataKey="date" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
+                />
                 <Legend />
-                <Bar dataKey="income" fill="#22c55e" name="Income" />
-                <Bar dataKey="expense" fill="#ef4444" name="Expense" />
+                <Bar dataKey="income" fill="#22c55e" name="Income" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="expense" fill="#ef4444" name="Expense" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="col-span-1">
           <CardHeader>
             <CardTitle>Recent Transactions</CardTitle>
             <CardDescription>Latest financial activity</CardDescription>
@@ -200,7 +243,7 @@ export default function WalletPage() {
                         <div className="font-medium">{t.category}</div>
                         <div className="text-xs text-muted-foreground">{t.description}</div>
                       </TableCell>
-                      <TableCell className={`text-right ${t.type === 'INCOME' ? 'text-green-600' : 'text-red-600'}`}>
+                      <TableCell className={`text-right font-medium ${t.type === 'INCOME' ? 'text-green-500' : 'text-red-500'}`}>
                         {t.type === 'INCOME' ? '+' : '-'}${t.amount.toFixed(2)}
                       </TableCell>
                     </TableRow>
