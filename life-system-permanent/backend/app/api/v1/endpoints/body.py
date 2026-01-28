@@ -3,13 +3,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app import crud, schemas
+from app import crud
+from app.schemas.body import BodyMetricResponse, BodyMetricCreate
 from app.api.v1.dependencies import get_current_user
 from app.models import User
 
 router = APIRouter()
 
-@router.get("/", response_model=List[schemas.BodyMetricResponse])
+@router.get("/", response_model=List[BodyMetricResponse])
 async def read_body_metrics(
     db: AsyncSession = Depends(get_db),
     skip: int = 0,
@@ -24,11 +25,11 @@ async def read_body_metrics(
     )
     return metrics
 
-@router.post("/", response_model=schemas.BodyMetricResponse)
+@router.post("/", response_model=BodyMetricResponse)
 async def create_body_metric(
     *,
     db: AsyncSession = Depends(get_db),
-    metric_in: schemas.BodyMetricCreate,
+    metric_in: BodyMetricCreate,
     current_user: User = Depends(get_current_user),
 ) -> Any:
     """

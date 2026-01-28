@@ -3,13 +3,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app import crud, schemas
+from app import crud
+from app.schemas.finance import FinanceTransactionResponse, FinanceTransactionCreate
 from app.api.v1.dependencies import get_current_user
 from app.models import User
 
 router = APIRouter()
 
-@router.get("/", response_model=List[schemas.FinanceTransactionResponse])
+@router.get("/", response_model=List[FinanceTransactionResponse])
 async def read_finance_transactions(
     db: AsyncSession = Depends(get_db),
     skip: int = 0,
@@ -24,11 +25,11 @@ async def read_finance_transactions(
     )
     return transactions
 
-@router.post("/", response_model=schemas.FinanceTransactionResponse)
+@router.post("/", response_model=FinanceTransactionResponse)
 async def create_finance_transaction(
     *,
     db: AsyncSession = Depends(get_db),
-    transaction_in: schemas.FinanceTransactionCreate,
+    transaction_in: FinanceTransactionCreate,
     current_user: User = Depends(get_current_user),
 ) -> Any:
     """
