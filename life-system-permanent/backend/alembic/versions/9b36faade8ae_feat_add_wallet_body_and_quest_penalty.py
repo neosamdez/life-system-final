@@ -20,37 +20,39 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    """Upgrade schema with RAW SQL checks."""
+    """Upgrade schema with SAFE NATIVE SQL DO BLOCKS."""
     bind = op.get_bind()
     inspector = Inspector.from_engine(bind)
     existing_tables = inspector.get_table_names()
 
-    # --- LÓGICA MANUAL PARA ENUMS (A MARRETA) ---
-    # Verifica diretamente na tabela interna do Postgres se o tipo existe
-    # Isso ignora qualquer "cache" ou "inteligência" do SQLAlchemy que esteja falhando
-    
+    # --- NEO PROTOCOL: NATIVE SQL DO BLOCKS ---
+    # We use PL/pgSQL DO blocks to check for type existence inside the DB engine.
+    # This avoids any Python-side race conditions or state drift.
+
     # 1. Financetypeenum
-    has_finance_enum = bind.execute(
-        sa.text("SELECT 1 FROM pg_type WHERE typname = 'financetypeenum'")
-    ).scalar()
-    
-    if not has_finance_enum:
-        # Se não existe, cria na força bruta via SQL
-        bind.execute(sa.text("CREATE TYPE financetypeenum AS ENUM ('INCOME', 'EXPENSE')"))
+    op.execute(sa.text("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'financetypeenum') THEN
+                CREATE TYPE financetypeenum AS ENUM ('INCOME', 'EXPENSE');
+            END IF;
+        END$$;
+    """))
 
     # 2. Questcategoryenum
-    has_quest_enum = bind.execute(
-        sa.text("SELECT 1 FROM pg_type WHERE typname = 'questcategoryenum'")
-    ).scalar()
-    
-    if not has_quest_enum:
-        bind.execute(sa.text("CREATE TYPE questcategoryenum AS ENUM ('DAILY', 'STORY', 'SIDE_QUEST')"))
+    op.execute(sa.text("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'questcategoryenum') THEN
+                CREATE TYPE questcategoryenum AS ENUM ('DAILY', 'STORY', 'SIDE_QUEST');
+            END IF;
+        END$$;
+    """))
 
-    # Define os objetos Enum com create_type=False para usar nas tabelas
-    # O create_type=False garante que o create_table NÃO tente criar o tipo de novo
+    # Define SQLAlchemy objects with create_type=False to prevent auto-creation attempts
     finance_enum_obj = sa.Enum('INCOME', 'EXPENSE', name='financetypeenum', create_type=False)
     quest_enum_obj = sa.Enum('DAILY', 'STORY', 'SIDE_QUEST', name='questcategoryenum', create_type=False)
-    # ---------------------------------------------
+    # ------------------------------------------
 
     # 1. Update Quests Table
     if 'quests' in existing_tables:
@@ -86,7 +88,6 @@ def upgrade() -> None:
         op.create_table('finance_transactions',
             sa.Column('id', sa.Integer(), nullable=False),
             sa.Column('user_id', sa.Integer(), nullable=False),
-            # Aqui passamos o objeto com create_type=False
             sa.Column('type', finance_enum_obj, nullable=False),
             sa.Column('amount', sa.Float(), nullable=False),
             sa.Column('category', sa.String(length=100), nullable=False),
@@ -102,7 +103,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Downgrade simplificado para evitar conflitos de tipos
+    # Simplified downgrade to avoid type conflicts
     bind = op.get_bind()
     inspector = Inspector.from_engine(bind)
     existing_tables = inspector.get_table_names()
