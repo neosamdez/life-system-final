@@ -20,26 +20,18 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    """Upgrade schema with SAFE NATIVE SQL DO BLOCKS."""
+    """Upgrade schema with NUCLEAR CLEANUP."""
     bind = op.get_bind()
     inspector = Inspector.from_engine(bind)
     existing_tables = inspector.get_table_names()
 
-    # --- NEO PROTOCOL: NATIVE SQL DO BLOCKS ---
-    # We use PL/pgSQL DO blocks to check for type existence inside the DB engine.
-    # This avoids any Python-side race conditions or state drift.
+    # --- NUCLEAR OPTION: DROP ZOMBIE TYPE ---
+    # Se a tabela de finanças não existe, o tipo 'financetypeenum' é lixo (zumbi).
+    # Vamos deletá-lo para limpar o caminho.
+    if 'finance_transactions' not in existing_tables:
+        op.execute("DROP TYPE IF EXISTS financetypeenum CASCADE")
 
-    # 1. Financetypeenum
-    op.execute(sa.text("""
-        DO $$
-        BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'financetypeenum') THEN
-                CREATE TYPE financetypeenum AS ENUM ('INCOME', 'EXPENSE');
-            END IF;
-        END$$;
-    """))
-
-    # 2. Questcategoryenum
+    # Para Quests, usamos o método seguro (DO BLOCK) pois a tabela já existe
     op.execute(sa.text("""
         DO $$
         BEGIN
@@ -49,10 +41,12 @@ def upgrade() -> None:
         END$$;
     """))
 
-    # Define SQLAlchemy objects with create_type=False to prevent auto-creation attempts
-    finance_enum_obj = sa.Enum('INCOME', 'EXPENSE', name='financetypeenum', create_type=False)
+    # Objetos Enum
+    # financetypeenum: Removemos create_type=False porque acabamos de deletá-lo (se existia).
+    # Agora queremos que ele SEJA CRIADO junto com a tabela.
+    # questcategoryenum: Mantemos create_type=False pois ele já foi tratado acima.
     quest_enum_obj = sa.Enum('DAILY', 'STORY', 'SIDE_QUEST', name='questcategoryenum', create_type=False)
-    # ------------------------------------------
+    # ----------------------------------------
 
     # 1. Update Quests Table
     if 'quests' in existing_tables:
@@ -85,10 +79,13 @@ def upgrade() -> None:
 
     # 3. Create FinanceTransaction Table
     if 'finance_transactions' not in existing_tables:
+        # AQUI ESTÁ O TRUQUE: Deixamos o SQLAlchemy criar o Enum nativamente
+        # porque garantimos lá em cima (DROP TYPE) que ele não existe mais.
         op.create_table('finance_transactions',
             sa.Column('id', sa.Integer(), nullable=False),
             sa.Column('user_id', sa.Integer(), nullable=False),
-            sa.Column('type', finance_enum_obj, nullable=False),
+            # Note: create_type=True é o padrão, então ele vai criar o tipo 'financetypeenum' agora.
+            sa.Column('type', sa.Enum('INCOME', 'EXPENSE', name='financetypeenum'), nullable=False),
             sa.Column('amount', sa.Float(), nullable=False),
             sa.Column('category', sa.String(length=100), nullable=False),
             sa.Column('description', sa.String(length=255), nullable=True),
@@ -103,13 +100,14 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Simplified downgrade to avoid type conflicts
+    # Downgrade
     bind = op.get_bind()
     inspector = Inspector.from_engine(bind)
     existing_tables = inspector.get_table_names()
 
     if 'finance_transactions' in existing_tables:
         op.drop_table('finance_transactions')
+        op.execute("DROP TYPE IF EXISTS financetypeenum CASCADE")
 
     if 'body_metrics' in existing_tables:
         op.drop_table('body_metrics')
